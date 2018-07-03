@@ -13,14 +13,18 @@ This is a tutorial for myself to go through the proccess of adding auth to my ow
 
 ### Getting Started
 
-1. Make sure you can install dev dependencies.
-```shell
-npm i sodium --save
-npm i jsonwebtoken dotenv --save
+1. Make sure you can install dev dependencies.  
+
+```js
+~ npm i sodium --save
+~ npm i jsonwebtoken dotenv --save
 ```
 
 2. Create an api auth route in `server/server.js`.
-```shell
+
+<details><summary>Show code</summary>
+  
+  ```js
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -42,9 +46,13 @@ server.get('*', (req, res) => {
 module.exports = server
 ```
 
+<details>
+
 3. Create the route file in `server/routes/auth`.
 
-```shell
+<details><summary>Show code</summary>
+  
+```js
 const express = require('express')
 
 const router = express.Router()
@@ -53,16 +61,26 @@ router.post('/register', register, token.issue)
 
 module.exports = router
 ```
+<details>
 
-Create a `users` table in your database. 
+4. Database
+___
 
-```shell
-yarn knex migrate:make users
+   a. Create a `users` table in your database. 
+
+<details><summary>Show code</summary>
+
+```js
+~ yarn knex migrate:make users
 ```
 
-example migration file for `users`
+<details>
 
-```shell
+   b. Create your migration file for `users`.
+
+<details><summary>Show code</summary>
+
+```js
 exports.up = (knex, Promise) => {
   return knex.schema.createTableIfNotExists('users', table => {
     table.increments('id')
@@ -76,18 +94,27 @@ exports.down = (knex, Promise) => {
 }
 ```
 
-Create the `users` seed data.
+<details>
 
+   c. Create the `users` seed data.
+
+<details><summary>Show code</summary>\>
+  
 ```shell
-yarn knex seed: make users
+~ yarn knex seed: make users
 ```
+  
+  <details>
 
-then 
+   d. Then make sure it's up and running in your database.
 
+<details><summary>Show code</summary>
+  
 ```shell
-yarn knex migrate:latest
-yarn knex seed:run
+~ yarn knex migrate:latest
+~ yarn knex seed:run
 ```
+  <details>
 
 ### References
 [Tutorial from EDA Bootcamp](https://github.com/harakeke-2018/jwt-auth)
