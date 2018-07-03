@@ -46,7 +46,7 @@ server.get('*', (req, res) => {
 module.exports = server
 ```
 
-<details>
+</details>
 
 3. Create the route file in `server/routes/auth`.
 
@@ -61,7 +61,7 @@ router.post('/register', register, token.issue)
 
 module.exports = router
 ```
-<details>
+</details>
 
 4. Database
 ___
@@ -74,7 +74,7 @@ ___
 ~ yarn knex migrate:make users
 ```
 
-<details>
+</details>
 
    b. Create your migration file for `users`.
 
@@ -94,7 +94,7 @@ exports.down = (knex, Promise) => {
 }
 ```
 
-<details>
+</details>
 
    c. Create the `users` seed data.
 
@@ -104,7 +104,7 @@ exports.down = (knex, Promise) => {
 ~ yarn knex seed: make users
 ```
   
-  <details>
+</details>
 
    d. Then make sure it's up and running in your database.
 
@@ -114,7 +114,7 @@ exports.down = (knex, Promise) => {
 ~ yarn knex migrate:latest
 ~ yarn knex seed:run
 ```
-  <details>
+</details>
 
 ### References
 [Tutorial from EDA Bootcamp](https://github.com/harakeke-2018/jwt-auth)
