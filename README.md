@@ -58,10 +58,11 @@ Require your two new functions created in the `server/db/users.js` file and use 
    - If there is an error, respond with a status 500 and this JSON object: {message: err.message}.
 
 8. The last step in registering a new user is to create and issue a JSON Web Token (JWT) the client can use when making future requests to protected endpoints. To ensure a JWT is valid, it is signed with a _secret string_. We normally keep that string in an environment variable on the server.
-Create a `.env` file in the root of your project. 
-
-Use this _example_ until you deploy.  
-`JWT_SECRET=a31sl86dfk862jsd54lfk123lksjhd92`. 
+Create a `.env` file in the root of your project.  
+   
+   <details><summary>Use this example until you deploy.</summary>
+   `JWT_SECRET=a31sl86dfk862jsd54lfk123lksjhd92`. 
+   </details>
 
 > When you deploy your project **CHANGE the `.env` file** to `.env.example` and create a new `.env` with a new 20 character code. Put .env into your `.gitignore`. You **DO NOT** want the secret to be publically displayed in your repo.
 
