@@ -28,28 +28,145 @@ or
 ~ npm i sodium passport express-jwt jsonwebtoken dotenv jwt-decode
 ```
 
-#### A. Issue Token
+### A. Issue Token
+
 1. Create an api auth route in `server/server.js` that will link to the file in the next step.
 
+<details><summary>Show code</summary>
+
+```javascript
+// server/server.js
+
+const path = require('path')
+const express = require('express')
+const passport = require('passport')
+const bodyParser = require('body-parser')
+
+const authRoutes = require('./routes/auth')
+
+const server = express()
+server.use(express.static(path.join(__dirname, 'public')))
+server.use(bodyParser.json())
+server.use(passport.initialize())
+server.use(express.json())
+
+// these are the routes we have created
+server.use('/api/v1/auth', authRoutes)
+
+// Default route for non-API requests
+server.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'))
+})
+
+module.exports = server
+```
+</details>
+    
 2. Create the route file in `server/routes/auth.js`.  
 The route should have a POST `/register` route that accepts a JSON object with `username` and `password` properties (as well as any other information you need for a user to register). The `/api/v1/auth` part is defined in `server/server.js`.  
 You can leave the route empty at this point. We need step A6 to complete it.
 
+   <details><summary>Show code</summary>
+
+   ```javascript
+   // server/routes/auth.js
+   const express = require('express')
+   const bodyParser = require('body-parser')
+   const router = express.Router()
+
+   module.exports = router
+
+   router.use(bodyParser.json())
+
+   router.post('/register', register, token.issue)
+
+   function register (req, res) {
+         const {username, password} = req.body
+         // TODO: make sure username doesn't already exist
+         // TODO: if not, hash the password and add the user to the database
+     }
+
+   module.exports = router
+   ```
+   </details>
+
 3. Create your register form component and client side route.
+
 4. Create your database so we have a place to store the user info.
-   - Create a `users` table in your database. 
-   - Complete your migration file for `users`.
-   - Create the `users` seed data.
-   - Then make sure it's up and running in your database.
+
+   <details><summary>Create a `users` table in your database.</summary>
+   `~ yarn knex migrate:make users` </details>
+   <details><summary>Complete your migration file for `users`.</summary>Code depends on version</details>
+   <details><summary>Create the `users` seed data.</summary>Code depends on version</details>
+   <details><summary>Then make sure it's up and running in your database.</summary>
+  
+  ```
+       ~ yarn knex migrate:latest
+       ~ yarn knex seed:run
+   ```
+  </details>
 
 5. Create a `server/auth/` folder. We'll use this folder to hold some auth-related helper functions.  
 We need a way of saving a password not in clear-text so we will use the `sodium` package to help create our secret password in a new `hash.js` file in our new folder. The hash module should export a `generate` function that takes the clear-text password as its only parameter, and use the `sodium api` to return a hash of that password.  
 We will use `generate` in the next step.
+
+   <details><summary>Show code.</summary>
+   
+   ```javascript
+    // server/auth/hash.js
+   
+    const sodium = require('sodium').api
+
+   module.exports = {
+    generate
+   }
+
+   function generate (password) {
+   const passwordBuffer = Buffer.from(password, 'utf8')
+    return sodium.crypto_pwhash_str(
+      passwordBuffer,
+      sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+      sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
+    )
+   }
+   ```
+   </details>
  
 6. Create a `server/db/users.js` file. We now need a way to save the new user to the database with the hash password and we should also make sure we can check that the username doesn't already exist. Don't forget to export these functions.
 So call `generate` in the `createUser` function, and import hash from `server/auth/hash`.
    - createUser(newUser:{username, password})
    - userExists(username)
+   
+  <details><summary>Show code.</summary>
+   
+   ```javascript
+   // server/db/users.js
+   const connection = require('./connection')
+   const hash = require('../auth/hash')
+
+   module.exports = {
+      createUser,
+      userExists
+   }
+
+   function createUser (username, password, conn) {
+      const passwordHash = hash.generate(password)
+      const db = conn || connection
+      return db('users')
+       .insert({username, hash: passwordHash})
+   }
+
+   function userExists (username, conn) {
+      const db = conn || connection
+      return db('users')
+       .count('id as n')
+       .where('username', username)
+       .then(count => {
+         return count[0].n > 0
+      })
+   }
+   ```
+   </details>
    
 7. Let's return to our `/register` route in `server/routes/auth.js`.  
 Require your two new functions created in the `server/db/users.js` file and use its functions to complete the register function for your register route.
@@ -87,7 +204,7 @@ The options parameter has an expiresIn property that is in zeit/ms format.
     - After the user is created, call .then(() => next()) instead of the res.json call
 13. Now use Postman to test registering new users. You should see the JWT in the response body.
 
-#### B. Apply Token
+### B. Apply Token
 We must be able to verify the authenticity of the token provided before we trust it. We can do this because it was signed with a secret (JWT_SECRET). Once we know we can trust it, we can decode it to extract the user's ID and username, which we will likely need to fulfil the request.
 The token will come in on the Authorization header. The `express-jwt` package is capable of getting the token out of the header, verifying its authenticity and populating `req.user` with the contents of the decoded token. We just need to give it the secret we used to sign it.
 
