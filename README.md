@@ -89,7 +89,7 @@ The token will come in on the Authorization header. The `express-jwt` package is
 
 1. To use `express-jwt` let's expose a `decode` function from our `server/auth/token.js` file. The decode function will be used as Express router middleware on all routes that need authentication. Here's how we'll use it:
 
-```shell
+```javascript
 // server/routes/ROUTES-YOU-NEED-AUTH-TO-VISIT.js
 const token = require('../auth/token')
 
