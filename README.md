@@ -91,6 +91,7 @@ const router = express.Router()
    ```
 </details>  
 
+
 3. Create your register form component and client side route.
 
 4. Create your database so we have a place to store the user info.
@@ -122,7 +123,8 @@ const router = express.Router()
        ~ yarn knex migrate:latest
        ~ yarn knex seed:run
    ```
-</details>
+</details>  
+
 
 5. Create a `server/auth/` folder. We'll use this folder to hold some auth-related helper functions.  
 We need a way of saving a password not in clear-text so we will use the `sodium` package to help create our secret password in a new `hash.js` file in our new folder. The hash module should export a `generate` function that takes the clear-text password as its only parameter, and use the `sodium api` to return a hash of that password.  
@@ -148,8 +150,9 @@ We will use `generate` in the next step.
     )
    }
    ```
-</details>
- 
+</details>  
+
+
 6. Create a `server/db/users.js` file. We now need a way to save the new user to the database with the hash password and we should also make sure we can check that the username doesn't already exist. Don't forget to export these functions.
 So call `generate` in the `createUser` function, and import hash from `server/auth/hash`.
    - createUser(newUser:{username, password})
@@ -184,8 +187,8 @@ So call `generate` in the `createUser` function, and import hash from `server/au
       })
    }
    ```
-</details>
-   
+</details>  
+
 7. Let's return to our `/register` route in `server/routes/auth.js`.  
 Require your two new functions created in the `server/db/users.js` file and use its functions to complete the register function for your register route.
    - If the username is already exists, send back a status 400 and this JSON object: {message: 'User exists'}.
@@ -220,7 +223,7 @@ function register (req, res) {
 
 module.exports = router
 ```
-</details>
+</details>  
 
 8. The last step in registering a new user is to create and issue a JSON Web Token (JWT) the client can use when making future requests to protected endpoints. To ensure a JWT is valid, it is signed with a _secret string_. We normally keep that string in an environment variable on the server.
 Create a `.env` file in the root of your project.  
@@ -232,7 +235,7 @@ Create a `.env` file in the root of your project.
    ``` 
 </details>
 
-> When you deploy your project **CHANGE the `.env` file** to `.env.example` and create a new `.env` with a new 20 character code. Put .env into your `.gitignore`. You **DO NOT** want the secret to be publically displayed in your repo.
+> When you deploy your project **CHANGE the `.env` file** to `.env.example` and create a new `.env` with a new 20 character code. Put .env into your `.gitignore`. You **DO NOT** want the secret to be publically displayed in your repo.  
 
 9. To enable the `dotenv` package so the environment variables are available, require its config function as early as possible in the server startup code `require('dotenv').config()` (e.g. at the top of server/index.js).
 
