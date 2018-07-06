@@ -60,19 +60,20 @@ server.get('*', (req, res) => {
 
 module.exports = server
 ```
-</details>
-    
+</details>  
+
+
 2. Create the route file in `server/routes/auth.js`.  
 The route should have a POST `/register` route that accepts a JSON object with `username` and `password` properties (as well as any other information you need for a user to register). The `/api/v1/auth` part is defined in `server/server.js`.  
 You can leave the route empty at this point. We need step A6 to complete it.
 
-   <details><summary>Show code</summary>
+<details><summary>Show code</summary>
 
-   ```javascript
-   // server/routes/auth.js
-   const express = require('express')
-   const bodyParser = require('body-parser')
-   const router = express.Router()
+```javascript
+// server/routes/auth.js
+const express = require('express')
+const bodyParser = require('body-parser')
+const router = express.Router()
 
    module.exports = router
 
@@ -88,29 +89,46 @@ You can leave the route empty at this point. We need step A6 to complete it.
 
    module.exports = router
    ```
-   </details>
+</details>  
 
 3. Create your register form component and client side route.
 
 4. Create your database so we have a place to store the user info.
 
-   <details><summary>Create a `users` table in your database.</summary>
-   `~ yarn knex migrate:make users` </details>
-   <details><summary>Complete your migration file for `users`.</summary>Code depends on version</details>
-   <details><summary>Create the `users` seed data.</summary>Code depends on version</details>
-   <details><summary>Then make sure it's up and running in your database.</summary>
+<details><summary>Create a `users` table in your database.</summary>
+   
+   ```shell
+   ~ yarn knex migrate:make users
+   ```
+</details>
   
-  ```
+<details><summary>Complete your migration file for `users`.</summary>
+  
+  ```shell
+   Code depends on version
+   ```
+</details>
+  
+<details><summary>Create the `users` seed data.</summary>
+  
+  ```shell
+   Code depends on version
+   ```
+</details>
+   
+<details><summary>Then make sure it's up and running in your database.</summary>
+   
+   ```shell
        ~ yarn knex migrate:latest
        ~ yarn knex seed:run
    ```
-  </details>
+</details>
 
 5. Create a `server/auth/` folder. We'll use this folder to hold some auth-related helper functions.  
 We need a way of saving a password not in clear-text so we will use the `sodium` package to help create our secret password in a new `hash.js` file in our new folder. The hash module should export a `generate` function that takes the clear-text password as its only parameter, and use the `sodium api` to return a hash of that password.  
 We will use `generate` in the next step.
 
-   <details><summary>Show code.</summary>
+<details><summary>Show code.</summary>
    
    ```javascript
     // server/auth/hash.js
@@ -130,14 +148,14 @@ We will use `generate` in the next step.
     )
    }
    ```
-   </details>
+</details>
  
 6. Create a `server/db/users.js` file. We now need a way to save the new user to the database with the hash password and we should also make sure we can check that the username doesn't already exist. Don't forget to export these functions.
 So call `generate` in the `createUser` function, and import hash from `server/auth/hash`.
    - createUser(newUser:{username, password})
    - userExists(username)
    
-  <details><summary>Show code.</summary>
+<details><summary>Show code.</summary>
    
    ```javascript
    // server/db/users.js
@@ -159,27 +177,60 @@ So call `generate` in the `createUser` function, and import hash from `server/au
    function userExists (username, conn) {
       const db = conn || connection
       return db('users')
-       .count('id as n')
+       .count('id')
        .where('username', username)
        .then(count => {
-         return count[0].n > 0
+         return count[0].id > 0
       })
    }
    ```
-   </details>
+</details>
    
 7. Let's return to our `/register` route in `server/routes/auth.js`.  
 Require your two new functions created in the `server/db/users.js` file and use its functions to complete the register function for your register route.
    - If the username is already exists, send back a status 400 and this JSON object: {message: 'User exists'}.
    - If the username is available, create the user and respond with a status 201.
    - If there is an error, respond with a status 500 and this JSON object: {message: err.message}.
+   
+<details><summary>Show code.</summary>
+   
+   ```javascript
+   // server/routes/auth.js
+const express = require('express')
+
+const {userExists, createUser} = require('../db/users')
+
+const router = express.Router()
+
+router.post('/register', register)
+
+function register (req, res) {
+  userExists(req.body.username)
+    .then(exists => {
+      if (exists) {
+        return res.status(400).send({ message: 'User exists' })
+      }
+      createUser(req.body.username, req.body.password)
+        .then(() => res.status(201).end())
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message })
+    })
+}
+
+module.exports = router
+```
+</details>
 
 8. The last step in registering a new user is to create and issue a JSON Web Token (JWT) the client can use when making future requests to protected endpoints. To ensure a JWT is valid, it is signed with a _secret string_. We normally keep that string in an environment variable on the server.
 Create a `.env` file in the root of your project.  
    
-   <details><summary>Use this example until you deploy.</summary>
-   `JWT_SECRET=a31sl86dfk862jsd54lfk123lksjhd92`. 
-   </details>
+<details><summary>Use this example until you deploy.</summary>
+   
+   ```shell
+   JWT_SECRET=a31sl86dfk862jsd54lfk123lksjhd92
+   ``` 
+</details>
 
 > When you deploy your project **CHANGE the `.env` file** to `.env.example` and create a new `.env` with a new 20 character code. Put .env into your `.gitignore`. You **DO NOT** want the secret to be publically displayed in your repo.
 
@@ -210,6 +261,8 @@ The token will come in on the Authorization header. The `express-jwt` package is
 
 1. To use `express-jwt` let's expose a `decode` function from our `server/auth/token.js` file. The decode function will be used as Express router middleware on all routes that need authentication. Here's how we'll use it:
 
+<details><summary>Show code.</summary>
+   
 ```javascript
 // server/routes/ROUTES-YOU-NEED-AUTH-TO-VISIT.js
 const token = require('../auth/token')
@@ -218,6 +271,7 @@ router.get('/:ROUTE-YOU-NEED-AUTH-TO-VISIT', token.decode, (req, res) => {
   // now req.user will contain the contents of our token
 })
 ```
+</details>  
 
 2. That means the signature of the decode function should look like this:
 
