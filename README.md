@@ -1,19 +1,20 @@
-# Auth Tutorial
+# Auth Tutorial (Full Stack)
 
 This is a tutorial for myself to go through the proccess of adding auth to my own projects using React and Redux.
 
 ## Contents
 - [File layout](#file-layout)
-- [Getting Started](#getting-started)
+- [Getting Started (backend)](#getting-started-with-backend)
 - [Issue Token](#a-issue-token)
 - [Apply Token](#b-apply-token)
+- [Getting Started (frontend)](#getting-started-with-frontend)
 - [References](#references)
 
 
 ### File Layout
 
 
-### Getting Started
+### Getting Started with Backend
 Make sure you can install the following dev dependencies.  
 - sodium (this takes a while)
 - passport
@@ -310,6 +311,11 @@ Show code
 
 Congratulations! You're verifying JWT tokens!
 
+### Getting Started with Frontend
+
+1. Create an auth actions file - `client/actions/auth.js`.
+2. Create an auth reducer file - `client/reducers/auth.js`.
+3. Create Register form  - `Register.jsx`.
 
 
 
